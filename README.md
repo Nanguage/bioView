@@ -1,4 +1,4 @@
-# BioView
+# bioView
 
 Command line tool for enhance the readability of bioinformatic file format: fasta, fastq and sam file.
 
