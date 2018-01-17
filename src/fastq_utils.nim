@@ -59,7 +59,7 @@ proc to_string(self:FastqRecord, hist_symbols:string=nil,
   result = "@" & self.name & "\n" &
     seq_str & "\n" &
     "+\n" &
-    qua_str & "\n"
+    qua_str
 
 
 iterator read_fastq(file:File): FastqRecord =
@@ -82,8 +82,10 @@ iterator read_fastq(file:File): FastqRecord =
 
 
 proc process_fastq*(fname: string, config:Config) =
-  let base_color = config.base_color
-  let hist_symbols = config.hist_symbols
+  let use_color = config.fq_config.base_color
+  let base_color = if use_color: config.base_color else: nil
+  let use_hist = config.fq_config.hist
+  let hist_symbols = if use_hist: config.fq_config.hist_symbols else: nil
   var f: File
   if open(f, fname):
     for rec in read_fastq(f):
@@ -103,7 +105,7 @@ when isMainModule:
   doAssert(qua_1.len() == qua_str_1.len())
   doAssert(qua_1.encode_quality() == qua_str_1)
 
-  let qua_1_hist = qua_1.to_hist(config.hist_symbols)
+  let qua_1_hist = qua_1.to_hist(config.fq_config.hist_symbols)
   echo qua_1_hist
   doAssert(qua_str_1.len() == int(qua_1_hist.len() / 3))
 
@@ -111,8 +113,8 @@ when isMainModule:
   var f: File = open("example/example.fq")
   for rec in read_fastq(f):
     if i == 0:
-      echo rec.to_string(hist_symbols=config.hist_symbols)
+      echo rec.to_string(hist_symbols=config.fq_config.hist_symbols)
     if i == 1:
-      echo rec.to_string(hist_symbols=config.hist_symbols, base_color=config.base_color)
+      echo rec.to_string(hist_symbols=config.fq_config.hist_symbols, base_color=config.base_color)
     inc i
   f.close()

@@ -2,17 +2,16 @@ let doc = """
 Command line tool for bioinformatics file format readability enhancement.
 
 Usage:
-  bioview <file> [--file-format=<format>] [--config-file=<config_file>]
-  bioview --color-atla
-  bioview --example-config
+  bioview fq <file> [--config-file=<config_file>] [--hist=<yes/no>] [--color=<yes/no>]
+  bioview color-atla
+  bioview example-config
   bioview (-h | --help)
 
 Options:
-  -h --help       Show this help information.
-  --color-atla    Show color atla.
-  --example-config    Print example json config.
-  --file-format=<format>    Specify file format. [fastq] | fasta | sam 
-  --config-file=<config_file>    The path to config file. default: "~/.config/bioview/config.json"
+  -h --help        Show this help information.
+  --hist=<yes/no>  Show quality hist or not. [yes]
+  --color=<yes/no> Show color height light or not. [yes]
+  --config-file=<config_file>    The path to config file. [~/.config/bioview/config.json]
 """
 
 import docopt
@@ -23,11 +22,11 @@ import configs
 
 let args = docopt(doc, version = "BioView 0.0.0")
 
-if args["--color-atla"]:
+if args["color-atla"]:
   print_color_atla()
   quit(0)
 
-if args["--example-config"]:
+if args["example-config"]:
   example_json()
   quit(0)
 
@@ -39,15 +38,20 @@ when not defined(release):
 
 # parse config
 let DEFAULT_CONFIG_PATH = "~/.config/bioview/config.json"
-let config = load_config(DEFAULT_CONFIG_PATH)
+var config = load_config(DEFAULT_CONFIG_PATH)
 
-var input_format: string
-if "file-format" in args:
-  input_format = $args["file-format"]
-else:
-  input_format = ""
 
-if (input_format == "") or
-   (input_format == "fastq") or
-   (input_format == "fq"):
+if (args["fq"]):
+  # process fastq file
+
+  if $args["--hist"] == "no":
+    config.fq_config.hist = false
+  elif $args["--hist"] == "yes":
+    config.fq_config.hist = true
+
+  if $args["--color"] == "no":
+    config.fq_config.base_color = false
+  elif $args["--hist"] == "yes":
+    config.fq_config.base_color = true
+
   process_fastq($args["<file>"], config)

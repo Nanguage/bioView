@@ -5,9 +5,25 @@ import unicode
 from color_atla import Color, BaseColor
 
 type
+  FastqConfig* = object
+    base_color*: bool
+    hist*: bool
+    hist_symbols*: string
+  
+  FastaConfig* = object
+    base_color*: bool
+  
+  SamConfig* = object
+    base_color*: bool
+    hist*: bool
+    hist_symbols*: string
+
   Config* = object
     base_color*: BaseColor
-    hist_symbols*: string
+    fq_config*: FastqConfig
+    fa_config*: FastaConfig
+    sam_config*: SamConfig
+
 
 let default_json_str* = """
   {
@@ -20,8 +36,26 @@ let default_json_str* = """
       "N": {"fg":-1,  "bg":-1}
     },
 
-    "hist_symbols": 
-    "▁▁▁▁▁▁▁▁▂▂▂▂▂▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▆▆▆▆▆▇▇▇▇▇██████"
+    "fq_config":
+    {
+      "base_color": true,
+      "hist": true,
+      "hist_symbols": 
+      "▁▁▁▁▁▁▁▁▂▂▂▂▂▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▆▆▆▆▆▇▇▇▇▇██████"
+    },
+
+    "fa_config":
+    {
+      "base_color": true
+    },
+
+    "sam_config":
+    {
+      "base_color": true,
+      "hist": true,
+      "hist_symbols": 
+      "▁▁▁▁▁▁▁▁▂▂▂▂▂▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▆▆▆▆▆▇▇▇▇▇██████"
+    }
   }
 """
 
@@ -56,5 +90,5 @@ when isMainModule:
   let a_color_bg: int = config.base_color.A.bg
   doAssert(a_color_bg == -1)
 
-  let hist_symbols: string = config.hist_symbols
+  let hist_symbols: string = config.fq_config.hist_symbols
   doAssert(hist_symbols.len() / 3 == 44)
