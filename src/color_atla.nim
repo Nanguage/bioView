@@ -13,6 +13,18 @@ type
     G*: Color
     N*: Color
 
+  FqIdPartsColors* = ref object
+    instrument*:   Color
+    run_id*:       Color
+    flowcell_id*:  Color
+    tile_number*:  Color
+    x_coordinate*: Color
+    y_coordinate*: Color
+    pair*:         Color
+    filtered*:     Color
+    control_bits*: Color
+    index_seq*:    Color
+
 
 proc toTable(base_color: BaseColor): Table[char, Color] =
   result = {
@@ -24,13 +36,18 @@ proc toTable(base_color: BaseColor): Table[char, Color] =
   }.toTable()
 
 
-proc colorize*(str_in:string|char, color_fg, color_bg: int): string =
-  result = "\e[38;5;" & $color_fg & "m" & "\e[48;5;" & $color_bg & "m" & str_in & "\e[0m"
-
-
 proc colorize*(str_in:string|char, color:Color): string =
-  let color_fg: int = color.fg
-  let color_bg: int = color.bg
+  if color.fg < 0 and color.bg >= 0:
+    result = "\e[48;5;" & $color.bg & "m" & str_in & "\e[0m"
+  elif color.fg >= 0 and color.bg < 0:
+    result = "\e[38;5;" & $color.fg & "m" & str_in & "\e[0m"
+  elif color.fg >= 0 and color.bg >= 0:
+    result = "\e[38;5;" & $color.fg & "m" & "\e[48;5;" & $color.bg & "m" & str_in & "\e[0m"
+  else:
+    result = $str_in
+
+
+proc colorize*(str_in:string|char, color_fg, color_bg: int): string =
   result = "\e[38;5;" & $color_fg & "m" & "\e[48;5;" & $color_bg & "m" & str_in & "\e[0m"
 
 
@@ -53,15 +70,7 @@ proc colorize_seq*(seq_str:string, base_color:BaseColor): string =
     else:
       newbase = 'N'
     let color = color_map[newbase]
-    let color_bg = color.bg
-    let color_fg = color.fg
-
-    if color_bg < 0:
-      colored = base.colorize(color_fg=color_fg)
-    elif color_fg < 0:
-      colored = base.colorize(color_bg=color_bg)
-    else:
-      colored = base.colorize(color_fg=color_fg, color_bg=color_bg)
+    colored = base.colorize(color)
     result.add(colored)
 
 
@@ -88,3 +97,21 @@ proc print_color_atla*(num_per_line:int=10) =
   echo()
   echo("Background:".colorize(color_fg=16, color_bg=255))
   print_colors(fgbg="bg")
+
+
+when isMainModule:
+  let s1 = "attggc"
+  var c1 = Color(fg:56, bg:(-1))
+
+  echo s1.colorize(c1)
+
+  c1.fg = -1
+  echo s1.colorize(c1)
+
+  c1.fg = -1
+  c1.bg = 30
+  echo s1.colorize(c1)
+
+  c1.fg = 10
+  c1.bg = 20
+  echo s1.colorize(c1)

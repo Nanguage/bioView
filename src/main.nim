@@ -2,15 +2,19 @@ let doc = """
 Command line tool for bioinformatics file format readability enhancement.
 
 Usage:
-  bioview fq <file> [--config-file=<config_file>] [--hist=<yes/no>] [--color=<yes/no>]
+  bioview fq <file> [--config-file=<config_file>] [--hist=<yes/no>] [--color=<yes/no>] [--phred=<33/64>] [--delimiter=<yes/no>]
+  bioview fa <file> [--config-file=<config_file>] [--color=<yes/no>]
+  bioview sam <file> [--config-file=<config_file>] [--hist=<yes/no>] [--color=<yes/no>] [--phred=<33/64>]
   bioview color-atla
   bioview example-config
   bioview (-h | --help)
 
 Options:
   -h --help        Show this help information.
+  --phred=<33/64>  Quality score encode for fastq file, 33 or 64. [33]
   --hist=<yes/no>  Show quality hist or not. [yes]
-  --color=<yes/no> Show color height light or not. [yes]
+  --delimiter=<yes/no> Show fastq record delimiter or not. [yes]
+  --color=<yes/no> Show color height light of bases or not. [yes]
   --config-file=<config_file>    The path to config file. [~/.config/bioview/config.json]
 """
 
@@ -38,20 +42,38 @@ when not defined(release):
 
 # parse config
 let DEFAULT_CONFIG_PATH = "~/.config/bioview/config.json"
-var config = load_config(DEFAULT_CONFIG_PATH)
+var config: Config
+if args["--config-file"]:
+  config = load_config($args["--config-file"])
+else:
+  config = load_config(DEFAULT_CONFIG_PATH)
 
 
 if (args["fq"]):
   # process fastq file
 
-  if $args["--hist"] == "no":
-    config.fq_config.hist = false
-  elif $args["--hist"] == "yes":
-    config.fq_config.hist = true
+  case $args["--phred"]
+  of "33":
+    config.fq_config.phred = 33
+  of "64":
+    config.fq_config.phred = 64
 
-  if $args["--color"] == "no":
+  case $args["--hist"]:
+  of "no":
+    config.fq_config.use_hist = false
+  of "yes":
+    config.fq_config.use_hist = true
+
+  case $args["--color"]:
+  of "no":
     config.fq_config.base_color = false
-  elif $args["--hist"] == "yes":
+  of "yes":
     config.fq_config.base_color = true
+
+  case $args["--delimiter"]:
+  of "no":
+    config.fq_config.use_delimiter = false
+  of "yes":
+    config.fq_config.use_delimiter = true
 
   process_fastq($args["<file>"], config)

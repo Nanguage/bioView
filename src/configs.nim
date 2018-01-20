@@ -2,20 +2,35 @@ import os
 import json
 import unicode
 
-from color_atla import Color, BaseColor
+from color_atla import Color, BaseColor, FqIdPartsColors
 
 type
+  FqIdentifier* = object
+    color*: Color
+    parse_parts*: bool
+    parts_colors*: FqIdPartsColors
+
+  Delimiter* = object
+    str*: string
+    len*: int
+    color*: Color
+
   FastqConfig* = object
+    phred*: int
     base_color*: bool
-    hist*: bool
+    use_hist*: bool
     hist_symbols*: string
+    identifier*: FqIdentifier
+    use_delimiter*: bool
+    delimiter*: Delimiter
   
   FastaConfig* = object
     base_color*: bool
   
   SamConfig* = object
+    phred*: int
     base_color*: bool
-    hist*: bool
+    use_hist*: bool
     hist_symbols*: string
 
   Config* = object
@@ -38,10 +53,37 @@ let default_json_str* = """
 
     "fq_config":
     {
+      "phred": 33,
       "base_color": true,
-      "hist": true,
+
+      "use_hist": true,
       "hist_symbols": 
-      "▁▁▁▁▁▁▁▁▂▂▂▂▂▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▆▆▆▆▆▇▇▇▇▇██████"
+      "▁▁▁▁▁▁▁▁▂▂▂▂▂▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▆▆▆▆▆▇▇▇▇▇██████",
+
+      "identifier": {
+        "color": {"fg": -1, "bg": -1},
+        "parse_parts": false,
+        "parts_colors": {
+          "instrument":   {"fg": -1, "bg": -1},
+          "run_id":       {"fg": -1, "bg": -1},
+          "flowcell_id":  {"fg": -1, "bg": -1},
+          "tile_number":  {"fg": -1, "bg": -1},
+          "x_coordinate": {"fg": -1, "bg": -1},
+          "y_coordinate": {"fg": -1, "bg": -1},
+          "pair":         {"fg": -1, "bg": -1},
+          "filtered":     {"fg": -1, "bg": -1},
+          "control_bits": {"fg": -1, "bg": -1},
+          "index_seq":    {"fg": -1, "bg": -1}
+        }
+      },
+
+      "use_delimiter": true,
+      "delimiter": {
+        "str": "-",
+        "len": 150,
+        "color": {"fg": -1, "bg": -1}
+      }
+
     },
 
     "fa_config":
@@ -51,8 +93,9 @@ let default_json_str* = """
 
     "sam_config":
     {
+      "phred": 33,
       "base_color": true,
-      "hist": true,
+      "use_hist": true,
       "hist_symbols": 
       "▁▁▁▁▁▁▁▁▂▂▂▂▂▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▆▆▆▆▆▇▇▇▇▇██████"
     }

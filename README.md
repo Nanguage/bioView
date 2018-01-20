@@ -4,5 +4,6 @@ Command line tool for enhance the readability of bioinformatic file format: fast
 
 ## Installation
 
-This tools is writen in Nim, it can be compiled to single corss-plantform single excutable file.
+This tools is writen in Nim, it can be compiled to a single excutable file.
 So, it is very easy to install, just download the release excutable file, and add it to your PATH.
+

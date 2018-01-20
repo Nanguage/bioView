@@ -1,6 +1,8 @@
-from color_atla import colorize_seq
-from color_atla import BaseColor
-from configs import Config
+import strutils
+
+from color_atla import colorize, colorize_seq
+from color_atla import Color, BaseColor, FqIdPartsColors
+from configs import Config, Delimiter
 
 proc parse_quality(quality_string:string, phred:int=33): seq[int] =
   assert phred == 33 or phred == 64
@@ -33,6 +35,56 @@ proc to_hist(quality:seq[int], hist_symbols:string, symbol_unit_len:int=3): stri
     else:
       result.add(hist_symbols[s..e])
 
+type 
+  Identifier = ref object
+    instrument:   string
+    run_id:       string
+    flowcell_id:  string
+    tile_number:  string
+    x_coordinate: string
+    y_coordinate: string
+    pair:         string
+    filtered:     string
+    control_bits: string
+    index_seq:    string
+
+
+proc parse_identifier(name: string): Identifier =
+  try:
+    let names = name.split(' ')
+    let (name1, name2) = (names[0], names[1])
+    let part1 = name1.split(':')
+    let part2 = name2.split(':')
+    result = Identifier(
+      instrument:   part1[0],
+      run_id:       part1[1],
+      flowcell_id:  part1[2],
+      tile_number:  part1[3],
+      x_coordinate: part1[4],
+      y_coordinate: part1[5],
+      pair:         part2[0],
+      filtered:     part2[1],
+      control_bits: part2[2],
+      index_seq:    part2[3],
+    )
+  except:
+    result = nil
+
+
+proc to_string(id:Identifier, color:FqIdPartsColors): string =
+  result = 
+    id.instrument.colorize(color.instrument) & ":" &
+    id.run_id.colorize(color.run_id) & ":" &
+    id.flowcell_id.colorize(color.flowcell_id) & ":" &
+    id.tile_number.colorize(color.tile_number) & ":" &
+    id.x_coordinate.colorize(color.x_coordinate) & ":" &
+    id.y_coordinate.colorize(color.y_coordinate) &
+    " " &
+    id.pair.colorize(color.pair) & ":" &
+    id.filtered.colorize(color.filtered) & ":" &
+    id.control_bits.colorize(color.control_bits) & ":" &
+    id.index_seq.colorize(color.index_seq)
+
 
 type
   FastqRecord = object
@@ -41,13 +93,27 @@ type
     quality: seq[int]
 
 
-proc to_string(self:FastqRecord, hist_symbols:string=nil,
-               base_color: BaseColor=nil): string =
+proc to_string(self:FastqRecord,
+               phred:int=33,
+               hist_symbols:string=nil,
+               base_color: BaseColor=nil,
+               id_color: Color=nil,
+               parts_colors: FqIdPartsColors=nil): string =
+  var id_str: string
   var qua_str: string
   var seq_str: string
 
+  if parts_colors == nil:
+    id_str = if id_color != nil: self.name.colorize(id_color) else: self.name
+  else:
+    let id = self.name.parse_identifier()
+    if id != nil:
+      id_str = id.to_string(parts_colors)
+    else: # exception occured when parse name to identifier
+      id_str = self.name
+
   if hist_symbols == nil:
-    qua_str = self.quality.encode_quality()
+    qua_str = self.quality.encode_quality(phred=phred)
   else:
     qua_str = self.quality.to_hist(hist_symbols)
 
@@ -56,13 +122,13 @@ proc to_string(self:FastqRecord, hist_symbols:string=nil,
   else:
     seq_str = self.sequence
 
-  result = "@" & self.name & "\n" &
+  result = "@" & id_str & "\n" &
     seq_str & "\n" &
     "+\n" &
     qua_str
 
 
-iterator read_fastq(file:File): FastqRecord =
+iterator read_fastq(file:File, phred:int=33): FastqRecord =
   var rec = FastqRecord(name:nil, sequence:nil, quality:nil)
   var line_num = 0
   for line in file.lines:
@@ -76,20 +142,39 @@ iterator read_fastq(file:File): FastqRecord =
     of 3:
       continue
     of 0:
-      rec.quality = line.parse_quality()
+      rec.quality = line.parse_quality(phred=phred)
       yield rec
       rec = FastqRecord(name:nil, sequence:nil, quality:nil)
 
 
+proc to_string(delimiter: Delimiter): string =
+  result = delimiter.str.repeat(delimiter.len).colorize(delimiter.color)
+
+
 proc process_fastq*(fname: string, config:Config) =
+  let phred = config.fq_config.phred
+  if phred != 33 and phred != 64:
+    raise newException(ValueError, "phred encode must be 33 or 64")
   let use_color = config.fq_config.base_color
   let base_color = if use_color: config.base_color else: nil
-  let use_hist = config.fq_config.hist
+  let use_hist = config.fq_config.use_hist
   let hist_symbols = if use_hist: config.fq_config.hist_symbols else: nil
+  let use_delimiter = config.fq_config.use_delimiter
+  let delimiter = config.fq_config.delimiter
+
+  let id_color = config.fq_config.identifier.color
+  let parse_parts = config.fq_config.identifier.parse_parts
+  let parts_colors = if parse_parts == false: nil else: config.fq_config.identifier.parts_colors
+
   var f: File
   if open(f, fname):
-    for rec in read_fastq(f):
-      echo rec.to_string(hist_symbols=hist_symbols, base_color=base_color)
+    if use_delimiter:
+      echo delimiter.to_string()
+    for rec in read_fastq(f, phred=phred):
+      echo rec.to_string(hist_symbols=hist_symbols, base_color=base_color, phred=phred,
+        id_color=id_color, parts_colors=parts_colors)
+      if use_delimiter:
+        echo delimiter.to_string()
 
 
 when isMainModule:
@@ -118,3 +203,11 @@ when isMainModule:
       echo rec.to_string(hist_symbols=config.fq_config.hist_symbols, base_color=config.base_color)
     inc i
   f.close()
+
+  let name1 = "@ST-E00126:415:HKVGNALXX:1:1101:2777:1836 1:N:0:GGACTC"
+  let id1 = name1.parse_identifier()
+  doAssert id1 != nil
+  var parts_colors = config.fq_config.identifier.parts_colors
+  parts_colors.instrument = Color(fg:10, bg:(-1))
+  parts_colors.index_seq = Color(fg:(-1), bg:20)
+  echo id1.to_string(parts_colors)
