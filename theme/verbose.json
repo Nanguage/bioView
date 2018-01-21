@@ -1,0 +1,77 @@
+  {
+    "base_color": 
+    {
+      "A": {"fg":196, "bg":-1},
+      "T": {"fg":50 , "bg":-1},
+      "C": {"fg":226, "bg":-1},
+      "G": {"fg":82 , "bg":-1},
+      "N": {"fg":-1,  "bg":-1}
+    },
+
+    "fq_config":
+    {
+      "phred": 33,
+
+      "use_color": true,
+      "use_base_color": true,
+
+      "hist": {
+        "use": true,
+        "symbols": 
+        "▁▁▁▁▁▁▁▁▂▂▂▂▂▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▆▆▆▆▆▇▇▇▇▇██████",
+        "symbol_unit_len": 3,
+        "align": 1,
+        "color": {"fg": -1, "bg": -1}
+      },
+
+      "identifier": {
+        "color": {"fg": -1, "bg": -1},
+        "parse_parts": true,
+        "parts_colors": {
+          "instrument":   {"fg": -1, "bg": 210},
+          "run_id":       {"fg": -1, "bg": 90},
+          "flowcell_id":  {"fg": -1, "bg": 100},
+          "tile_number":  {"fg": -1, "bg": 83},
+          "x_coordinate": {"fg": -1, "bg": 1},
+          "y_coordinate": {"fg": -1, "bg": 2},
+          "pair":         {"fg": -1, "bg": 160},
+          "filtered":     {"fg": -1, "bg": 124},
+          "control_bits": {"fg": -1, "bg": 87},
+          "index_seq":    {"fg": 81, "bg": -1}
+        }
+      },
+
+      "delimiter": {
+        "use": true,
+        "str": "-",
+        "len": 150,
+        "color": {"fg": -1, "bg": -1}
+      }
+
+    },
+
+    "fa_config":
+    {
+      "use_color": true,
+      "use_base_color": true
+    },
+
+    "sam_config":
+    {
+      "phred": 33,
+
+      "use_color": true,
+      "use_base_color": true,
+
+      "hist": {
+        "use": true,
+        "symbols": 
+        "▁▁▁▁▁▁▁▁▂▂▂▂▂▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▆▆▆▆▆▇▇▇▇▇██████",
+        "symbol_unit_len": 3,
+        "align": 1,
+        "color": {"fg": -1, "bg": -1}
+      }
+
+    }
+  }
+
