@@ -18,6 +18,8 @@ Options:
   --config-file=<config_file>    The path to config file. [~/.config/bioview/config.json]
 """
 
+import os
+
 import docopt
 
 import color_atla
@@ -44,7 +46,10 @@ when not defined(release):
 let DEFAULT_CONFIG_PATH = "~/.config/bioview/config.json"
 var config: Config
 if args["--config-file"]:
-  config = load_config($args["--config-file"])
+  let conf = $args["--config-file"]
+  if not existsFile(conf):
+    stderr.writeLine("Config file " & conf & " not exist, use default config.")
+  config = load_config(conf)
 else:
   config = load_config(DEFAULT_CONFIG_PATH)
 
@@ -60,20 +65,20 @@ if (args["fq"]):
 
   case $args["--hist"]:
   of "no":
-    config.fq_config.use_hist = false
+    config.fq_config.hist.use = false
   of "yes":
-    config.fq_config.use_hist = true
+    config.fq_config.hist.use = true
 
   case $args["--color"]:
   of "no":
-    config.fq_config.base_color = false
+    config.fq_config.use_color = false
   of "yes":
-    config.fq_config.base_color = true
+    config.fq_config.use_color = true
 
   case $args["--delimiter"]:
   of "no":
-    config.fq_config.use_delimiter = false
+    config.fq_config.delimiter.use = false
   of "yes":
-    config.fq_config.use_delimiter = true
+    config.fq_config.delimiter.use = true
 
   process_fastq($args["<file>"], config)

@@ -10,28 +10,36 @@ type
     parse_parts*: bool
     parts_colors*: FqIdPartsColors
 
+  Hist* = object
+    use*: bool
+    symbols*: string
+    symbol_unit_len*: int
+    align*: int
+    color*: Color
+
   Delimiter* = object
+    use*: bool
     str*: string
     len*: int
     color*: Color
 
   FastqConfig* = object
     phred*: int
-    base_color*: bool
-    use_hist*: bool
-    hist_symbols*: string
+    use_color*: bool
+    use_base_color*: bool
+    hist*: Hist
     identifier*: FqIdentifier
-    use_delimiter*: bool
     delimiter*: Delimiter
-  
+
   FastaConfig* = object
-    base_color*: bool
+    use_color*: bool
+    use_base_color*: bool
   
   SamConfig* = object
     phred*: int
-    base_color*: bool
-    use_hist*: bool
-    hist_symbols*: string
+    use_color*: bool
+    use_base_color*: bool
+    hist*: Hist
 
   Config* = object
     base_color*: BaseColor
@@ -54,11 +62,18 @@ let default_json_str* = """
     "fq_config":
     {
       "phred": 33,
-      "base_color": true,
 
-      "use_hist": true,
-      "hist_symbols": 
-      "▁▁▁▁▁▁▁▁▂▂▂▂▂▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▆▆▆▆▆▇▇▇▇▇██████",
+      "use_color": true,
+      "use_base_color": true,
+
+      "hist": {
+        "use": true,
+        "symbols": 
+        "▁▁▁▁▁▁▁▁▂▂▂▂▂▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▆▆▆▆▆▇▇▇▇▇██████",
+        "symbol_unit_len": 3,
+        "align": 1,
+        "color": {"fg": -1, "bg": -1}
+      },
 
       "identifier": {
         "color": {"fg": -1, "bg": -1},
@@ -77,8 +92,8 @@ let default_json_str* = """
         }
       },
 
-      "use_delimiter": true,
       "delimiter": {
+        "use": true,
         "str": "-",
         "len": 150,
         "color": {"fg": -1, "bg": -1}
@@ -88,16 +103,26 @@ let default_json_str* = """
 
     "fa_config":
     {
-      "base_color": true
+      "use_color": true,
+      "use_base_color": true
     },
 
     "sam_config":
     {
       "phred": 33,
-      "base_color": true,
-      "use_hist": true,
-      "hist_symbols": 
-      "▁▁▁▁▁▁▁▁▂▂▂▂▂▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▆▆▆▆▆▇▇▇▇▇██████"
+
+      "use_color": true,
+      "use_base_color": true,
+
+      "hist": {
+        "use": true,
+        "symbols": 
+        "▁▁▁▁▁▁▁▁▂▂▂▂▂▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▆▆▆▆▆▇▇▇▇▇██████",
+        "symbol_unit_len": 3,
+        "align": 1,
+        "color": {"fg": -1, "bg": -1}
+      }
+
     }
   }
 """
@@ -133,5 +158,5 @@ when isMainModule:
   let a_color_bg: int = config.base_color.A.bg
   doAssert(a_color_bg == -1)
 
-  let hist_symbols: string = config.fq_config.hist_symbols
+  let hist_symbols: string = config.fq_config.hist.symbols
   doAssert(hist_symbols.len() / 3 == 44)

@@ -35,6 +35,17 @@ proc to_hist(quality:seq[int], hist_symbols:string, symbol_unit_len:int=3): stri
     else:
       result.add(hist_symbols[s..e])
 
+
+proc add_space(str:string, unit:int=1, space:int=1): string =
+  result = ""
+  var i: int = 1
+  while i <= str.len:
+    result.add(str[i-1])
+    if i mod unit == 0:
+      result.add(" ".repeat(space))
+    inc i
+
+
 type 
   Identifier = ref object
     instrument:   string
@@ -95,7 +106,11 @@ type
 
 proc to_string(self:FastqRecord,
                phred:int=33,
+               use_color:bool=true,
                hist_symbols:string=nil,
+               hist_symbol_unit_len:int=3,
+               align:int=1,
+               hist_color:Color=nil,
                base_color: BaseColor=nil,
                id_color: Color=nil,
                parts_colors: FqIdPartsColors=nil): string =
@@ -103,25 +118,44 @@ proc to_string(self:FastqRecord,
   var qua_str: string
   var seq_str: string
 
+  # process identifier
   if parts_colors == nil:
-    id_str = if id_color != nil: self.name.colorize(id_color) else: self.name
+    id_str =
+      if use_color and id_color != nil:
+        self.name.colorize(id_color)
+      else:
+        self.name
   else:
     let id = self.name.parse_identifier()
-    if id != nil:
+    if id != nil and use_color:
       id_str = id.to_string(parts_colors)
-    else: # exception occured when parse name to identifier
+    else:
+      # not use color or
+      # exception occured when parse name to identifier
       id_str = self.name
 
+  # process sequence
+  seq_str =
+    if align > 1: # align sequence
+      self.sequence.add_space(unit=1, space=(align-1))
+    else:
+      self.sequence
+
+  if use_color and base_color != nil: # colorize sequence
+    seq_str = seq_str.colorize_seq(base_color)
+  else:
+    seq_str = seq_str
+
+  # process quality string
   if hist_symbols == nil:
     qua_str = self.quality.encode_quality(phred=phred)
-  else:
-    qua_str = self.quality.to_hist(hist_symbols)
-
-  if base_color != nil:
-    seq_str = self.sequence.colorize_seq(base_color)
-  else:
-    seq_str = self.sequence
-
+  else: # use histogram
+    qua_str = self.quality.to_hist(hist_symbols, symbol_unit_len=hist_symbol_unit_len)
+    if align > 1: # align quality string
+      qua_str = qua_str.add_space(unit=hist_symbol_unit_len, space=(align-1))
+    if use_color and hist_color != nil: # colorize quality string
+      qua_str = qua_str.colorize(color=hist_color)
+    
   result = "@" & id_str & "\n" &
     seq_str & "\n" &
     "+\n" &
@@ -155,11 +189,16 @@ proc process_fastq*(fname: string, config:Config) =
   let phred = config.fq_config.phred
   if phred != 33 and phred != 64:
     raise newException(ValueError, "phred encode must be 33 or 64")
-  let use_color = config.fq_config.base_color
+  let use_color = config.fq_config.use_color
   let base_color = if use_color: config.base_color else: nil
-  let use_hist = config.fq_config.use_hist
-  let hist_symbols = if use_hist: config.fq_config.hist_symbols else: nil
-  let use_delimiter = config.fq_config.use_delimiter
+
+  let use_hist = config.fq_config.hist.use
+  let hist_symbols = if use_hist: config.fq_config.hist.symbols else: nil
+  let hist_color = config.fq_config.hist.color
+  let hist_symbol_unit_len = config.fq_config.hist.symbol_unit_len
+  let align = config.fq_config.hist.align
+
+  let use_delimiter = config.fq_config.delimiter.use
   let delimiter = config.fq_config.delimiter
 
   let id_color = config.fq_config.identifier.color
@@ -171,7 +210,9 @@ proc process_fastq*(fname: string, config:Config) =
     if use_delimiter:
       echo delimiter.to_string()
     for rec in read_fastq(f, phred=phred):
-      echo rec.to_string(hist_symbols=hist_symbols, base_color=base_color, phred=phred,
+      echo rec.to_string(
+        hist_symbols=hist_symbols, hist_color=hist_color, hist_symbol_unit_len=hist_symbol_unit_len, align=align,
+        use_color=use_color, base_color=base_color, phred=phred,
         id_color=id_color, parts_colors=parts_colors)
       if use_delimiter:
         echo delimiter.to_string()
@@ -190,17 +231,26 @@ when isMainModule:
   doAssert(qua_1.len() == qua_str_1.len())
   doAssert(qua_1.encode_quality() == qua_str_1)
 
-  let qua_1_hist = qua_1.to_hist(config.fq_config.hist_symbols)
+  let symbols_1 = "▁▁▁▁▁▁▁▁▂▂▂▂▂▃▃▃▃▃▄▄▄▄▄▅▅▅▅▅▆▆▆▆▆▇▇▇▇▇██████"
+  let qua_1_hist = qua_1.to_hist(symbols_1)
   echo qua_1_hist
   doAssert(qua_str_1.len() == int(qua_1_hist.len() / 3))
+
+  echo qua_str_1.add_space(space=1)
+  let symbols_2 = "👿👿👿👿👿😫😫😫😫😫🙁🙁🙁🙁🙁😣😣😣😣😣🙃🙃🙃🙃🙃😑😑😑😑😑🙂🙂🙂🙂🙂😃😃😃😃😃"
+  let qua_2_hist = qua_1.to_hist(symbols_2, symbol_unit_len=4).add_space(unit=4, space=1)
+  echo qua_2_hist
+
 
   var i: int = 0
   var f: File = open("example/example.fq")
   for rec in read_fastq(f):
     if i == 0:
-      echo rec.to_string(hist_symbols=config.fq_config.hist_symbols)
+      echo rec.to_string(hist_symbols=config.fq_config.hist.symbols)
     if i == 1:
-      echo rec.to_string(hist_symbols=config.fq_config.hist_symbols, base_color=config.base_color)
+      echo rec.to_string(hist_symbols=config.fq_config.hist.symbols, base_color=config.base_color)
+    if i == 2:
+      echo rec.to_string(hist_symbols=symbols_2, hist_symbol_unit_len=4, align=2)
     inc i
   f.close()
 

@@ -57,7 +57,7 @@ proc colorize*(str_in:string|char, color_fg: int): string =
 
 proc colorize*(str_in:string|char, color_bg: int): string =
   result = "\e[48;5;" & $color_bg & "m" & str_in & "\e[0m"
-  
+
 
 proc colorize_seq*(seq_str:string, base_color:BaseColor): string =
   result = ""
@@ -67,10 +67,10 @@ proc colorize_seq*(seq_str:string, base_color:BaseColor): string =
   for base in seq_str:
     if base.toUpperAscii() in {'A', 'T', 'C', 'G'}:
       newbase = base.toUpperAscii()
+      let color = color_map[newbase]
+      colored = base.colorize(color)
     else:
-      newbase = 'N'
-    let color = color_map[newbase]
-    colored = base.colorize(color)
+      colored = $base
     result.add(colored)
 
 
