@@ -2,28 +2,28 @@ import os
 import json
 import unicode
 
-from color_atla import Color, BaseColor, AminoColor, FqIdPartsColors
+import color_atla
 
 type
-  FqIdentifier* = object
+  FqIdentifier* = ref object
     color*: Color
     parse_parts*: bool
     parts_colors*: FqIdPartsColors
 
-  Hist* = object
+  Hist* = ref object
     use*: bool
     symbols*: string
     symbol_unit_len*: int
     align*: int
     color*: Color
 
-  Delimiter* = object
+  Delimiter* = ref object
     use*: bool
     str*: string
     len*: int
     color*: Color
 
-  FastqConfig* = object
+  FastqConfig* = ref object
     phred*: int
     use_color*: bool
     use_base_color*: bool
@@ -31,20 +31,42 @@ type
     identifier*: FqIdentifier
     delimiter*: Delimiter
 
-  FastaConfig* = object
+  FastaConfig* = ref object
     use_color*: bool
     use_base_color*: bool
     record_type*: string
     amino_color*: AminoColor
     identifier_color*: Color
+
+  SamHeader* = ref object
+    header_type*: Color
+    item_key*: Color
+    item_value*: Color
+
+  SamOptionalFields* = ref object
+    tag*: Color
+    field_type*: Color
+    value*: Color
   
-  SamConfig* = object
+  SamConfig* = ref object
     phred*: int
+    multiline*: bool
+    delimiter*: Delimiter
     use_color*: bool
+    header_color*: SamHeader
+    qname_color*: Color
+    flag_color*: Color
+    rname_color*: Color
+    mapq_color_range*: ColorRange
+    cigar_color*: Color
+    rnext_color*: Color
+    pnext_color*: Color
+    tlen_color*: Color
+    optional_fields: SamOptionalFields 
     use_base_color*: bool
     hist*: Hist
 
-  Config* = object
+  Config* = ref object
     base_color*: BaseColor
     fq_config*: FastqConfig
     fa_config*: FastaConfig
@@ -143,6 +165,43 @@ let default_json_str* = """
       "phred": 33,
 
       "use_color": true,
+
+      "multiline": false,
+
+      "delimiter": {
+        "use": true,
+        "str": "-",
+        "len": 150,
+        "color": {"fg": -1, "bg": -1}
+      },
+
+      "header_color": {
+        "header_type": {"fg": -1,  "bg": -1},
+        "item_key":    {"fg": 202, "bg": -1},
+        "item_value":  {"fg": 202, "bg": -1}
+      },
+
+      "qname_color": {"fg": -1, "bg": -1},
+      "flag_color":  {"fg": -1, "bg": -1},
+      "rname_color": {"fg": -1, "bg": -1},
+      "pos_color":   {"fg": -1, "bg": -1},
+
+      "mapq_color_range": {
+        "buttom": {"val":0,  "color": {"fg": -1, "bg": -1}},
+        "top":    {"val":30, "color": {"fg": -1, "bg": -1}},
+      },
+
+      "cigar_color": {"fg": -1, "bg": -1},
+      "rnext_color": {"fg": -1, "bg": -1},
+      "pnext_color": {"fg": -1, "bg": -1},
+      "tlen_color":  {"fg": -1, "bg": -1},
+
+      "optional_fields_color": {
+        "tag": {"fg": -1, "bg": -1},
+        "field_type": {"fg": -1, "bg": -1},
+        "value": {"fg": -1, "bg": -1}
+      },
+
       "use_base_color": true,
 
       "hist": {
@@ -162,8 +221,10 @@ let default_json_str* = """
 proc example_json*() =
   echo(default_json_str)
 
+
 proc load_from_path(path: string="~/.config/bioview/config.json"): JsonNode =
   parseFile(path)
+
 
 proc load_config*(path: string=nil): Config =
   var config_json: JsonNode

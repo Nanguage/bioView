@@ -6,6 +6,14 @@ type
     fg*: int
     bg*: int
 
+  ValColor* = ref object
+    val*: int
+    color*: Color
+
+  ColorRange* = ref object
+    buttom*: ValColor
+    top*:    ValColor
+
   BaseColor* = ref object
     A*: Color
     T*: Color
@@ -123,6 +131,32 @@ proc colorize_seq*(seq_str:string, color:BaseColor|AminoColor): string =
     else:
       colored = $base
     result.add(colored)
+
+
+proc determine_color(score:int, color_low:int, val_low:int, color_high:int, val_high:int): int = 
+  # determine foreground or background color
+  if color_low == color_high or val_low == val_high:
+    return color_low
+  elif color_low < color_high:
+    let r:float = (score - val_low) / (val_high - val_low)
+    let color = (color_low.float + (color_high - color_low).float * r).int
+    return color
+  else:
+    let r:float = (score - val_low) / (val_high - val_low)
+    let color = (color_high.float + (color_low - color_high).float * r).int
+    return color
+
+
+proc colorize_score*(score:int, color_range:ColorRange): string =
+  let cr = color_range
+
+  doAssert(cr.buttom.val <= cr.top.val)
+  let val_range = (cr.buttom.val, cr.top.val)
+
+  let fg = determine_color(score, cr.buttom.color.fg, val_range[0], cr.top.color.fg, val_range[1])
+  let bg = determine_color(score, cr.buttom.color.bg, val_range[0], cr.top.color.bg, val_range[1])
+
+  result = colorize($score, color_fg=fg, color_bg=bg)
 
 
 proc print_color_atla*(num_per_line:int=10) =
