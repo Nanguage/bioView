@@ -13,23 +13,30 @@ proc process_fasta*(fname:string, config:Config) =
   let amino_color = config.fa_config.amino_color
 
   var f: File
-  if open(f, fname):
-    for line in f.lines:
-      if line.startsWith('>'): # identifier line
-        if use_color:
-          echo line.colorize(id_color)
-        else:
-          echo line
+  if fname == "-":
+    f = stdin
+  else:
+    if open(f, fname):
+      discard
+    else:
+      raise newException(IOError, fname & " can not open.")
+  
+  for line in f.lines:
+    if line.startsWith('>'): # identifier line
+      if use_color:
+        echo line.colorize(id_color)
       else:
-        if use_color and use_base_color:
-          let colored = 
-            if record_type.toUpperAscii == "PROTEIN":
-              line.colorize_seq(amino_color)
-            else:
-              line.colorize_seq(base_color)
-          echo colored
-        else:
-          echo line
+        echo line
+    else:
+      if use_color and use_base_color:
+        let colored = 
+          if record_type.toUpperAscii == "PROTEIN":
+            line.colorize_seq(amino_color)
+          else:
+            line.colorize_seq(base_color)
+        echo colored
+      else:
+        echo line
 
 when isMainModule:
   discard

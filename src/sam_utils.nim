@@ -160,21 +160,28 @@ proc to_string(record:SamRecord, base_color:BaseColor, config:SamConfig): string
 
 proc process_sam*(fname:string, config:Config) =
   var f: File
-  if open(f, fname):
-    for line in f.lines:
+  if fname == "-":
+    f = stdin
+  else:
+    if open(f, fname):
+      discard
+    else:
+      raise newException(IOError, fname & " can not open.")
 
-      if line.startswith("@"):
-        let header = parse_header(line)
-        let hc = config.sam_config.header_color
-        echo header.to_string(hc.header_type, hc.item_key, hc.item_value)
-      else:
-        if config.sam_config.delimiter.use:
-          echo config.sam_config.delimiter.to_string()
-        let rec = parse_record(line)
-        echo rec.to_string(config.base_color, config.sam_config)
+  for line in f.lines:
 
-    if config.sam_config.delimiter.use:
-      echo config.sam_config.delimiter.to_string()
+    if line.startswith("@"):
+      let header = parse_header(line)
+      let hc = config.sam_config.header_color
+      echo header.to_string(hc.header_type, hc.item_key, hc.item_value)
+    else:
+      if config.sam_config.delimiter.use:
+        echo config.sam_config.delimiter.to_string()
+      let rec = parse_record(line)
+      echo rec.to_string(config.base_color, config.sam_config)
+
+  if config.sam_config.delimiter.use:
+    echo config.sam_config.delimiter.to_string()
 
 
 when isMainModule:

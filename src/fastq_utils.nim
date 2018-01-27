@@ -206,16 +206,23 @@ proc process_fastq*(fname: string, config:Config) =
   let parts_colors = if parse_parts == false: nil else: config.fq_config.identifier.parts_colors
 
   var f: File
-  if open(f, fname):
+  if fname == "-":
+    f = stdin
+  else:
+    if open(f, fname):
+      discard
+    else:
+      raise newException(IOError, fname & " can not open.")
+
+  if use_delimiter:
+    echo delimiter.to_string()
+  for rec in read_fastq(f, phred=phred):
+    echo rec.to_string(
+      hist_symbols=hist_symbols, hist_color=hist_color, hist_symbol_unit_len=hist_symbol_unit_len, align=align,
+      use_color=use_color, base_color=base_color, phred=phred,
+      id_color=id_color, parts_colors=parts_colors)
     if use_delimiter:
       echo delimiter.to_string()
-    for rec in read_fastq(f, phred=phred):
-      echo rec.to_string(
-        hist_symbols=hist_symbols, hist_color=hist_color, hist_symbol_unit_len=hist_symbol_unit_len, align=align,
-        use_color=use_color, base_color=base_color, phred=phred,
-        id_color=id_color, parts_colors=parts_colors)
-      if use_delimiter:
-        echo delimiter.to_string()
 
 
 when isMainModule:
