@@ -47,7 +47,7 @@ when not defined(release):
   stderr.flushFile()
 
 # parse config
-let DEFAULT_CONFIG_PATH = "~/.config/bioview/config.json"
+let DEFAULT_CONFIG_PATH = getHomeDir().joinPath("/.config/bioview/config.json")
 var config: Config
 if args["--config-file"]:
   let conf = $args["--config-file"]
@@ -55,6 +55,8 @@ if args["--config-file"]:
     stderr.writeLine("Config file " & conf & " not exist, use default config.")
   config = load_config(conf)
 else:
+  if not existsFile(DEFAULT_CONFIG_PATH):
+    stderr.writeLine("Warning: " & DEFAULT_CONFIG_PATH & " not exist.")
   config = load_config(DEFAULT_CONFIG_PATH)
 
 
