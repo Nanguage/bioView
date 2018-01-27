@@ -9,6 +9,13 @@ A configurable and easy install command line tool for the readability enhancemen
 This tools is writen in Nim, it can be compiled to a single excutable file.
 So, it is very easy to install, just download the release excutable file, and add it to your PATH.
 
+### Shell configuration
+
+For ease of use, you can append the configuration to your shell config file.
+
+* For Bash shell: [bash config](./shell_config/bash_config.bash)
+* For Fish shell: [fish config](./shell_config/fish_config.fish)
+
 ## Usage
 
 ``` bash
