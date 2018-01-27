@@ -138,10 +138,18 @@ proc determine_color(score:int, color_low:int, val_low:int, color_high:int, val_
   if color_low == color_high or val_low == val_high:
     return color_low
   elif color_low < color_high:
+    if score < val_low:
+      return color_low
+    elif score > val_high:
+      return color_high
     let r:float = (score - val_low) / (val_high - val_low)
     let color = (color_low.float + (color_high - color_low).float * r).int
     return color
   else:
+    if score > val_high:
+      return color_high
+    elif score < val_low:
+      return color_low
     let r:float = (score - val_low) / (val_high - val_low)
     let color = (color_high.float + (color_low - color_high).float * r).int
     return color
@@ -156,7 +164,7 @@ proc colorize_score*(score:int, color_range:ColorRange): string =
   let fg = determine_color(score, cr.buttom.color.fg, val_range[0], cr.top.color.fg, val_range[1])
   let bg = determine_color(score, cr.buttom.color.bg, val_range[0], cr.top.color.bg, val_range[1])
 
-  result = colorize($score, color_fg=fg, color_bg=bg)
+  result = colorize(score.intToStr, Color(fg:fg, bg:bg))
 
 
 proc print_color_atla*(num_per_line:int=10) =
@@ -200,3 +208,9 @@ when isMainModule:
   c1.fg = 10
   c1.bg = 20
   echo s1.colorize(c1)
+
+  echo $determine_color(20, 232, 0, 255, 30)
+
+  import configs
+  let config = load_config()
+  echo colorize_score(20, config.sam_config.mapq_color_range)

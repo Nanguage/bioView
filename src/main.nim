@@ -4,7 +4,7 @@ Command line tool for bioinformatics file format readability enhancement.
 Usage:
   bioview fq <file> [--config-file=<config_file>] [--hist=<yes/no>] [--color=<yes/no>] [--phred=<33/64>] [--delimiter=<yes/no>]
   bioview fa <file> [--config-file=<config_file>] [--color=<yes/no>] [--type=<dna/rna/protein>]
-  bioview sam <file> [--config-file=<config_file>] [--hist=<yes/no>] [--color=<yes/no>] [--phred=<33/64>]
+  bioview sam <file> [--config-file=<config_file>] [--hist=<yes/no>] [--color=<yes/no>] [--phred=<33/64>] [--multiline=<yes/no>]
   bioview color-atla
   bioview example-config
   bioview (-h | --help)
@@ -14,6 +14,7 @@ Options:
   --phred=<33/64>  Quality score encode for fastq file, 33 or 64. [33]
   --hist=<yes/no>  Show quality hist or not. [yes]
   --delimiter=<yes/no> Show fastq record delimiter or not. [yes]
+  --multiline=<yes/no> Show multiple line format of sam file. [no]
   --color=<yes/no> Show color height light of bases or not. [yes]
   --type=<dna/rna/protein>       The record type of fasta file. [dna]
   --config-file=<config_file>    The path to config file. [~/.config/bioview/config.json]
@@ -26,6 +27,7 @@ import docopt
 import color_atla
 import fastq_utils
 import fasta_utils
+import sam_utils
 import configs
 
 let args = docopt(doc, version = "BioView 0.0.0")
@@ -103,3 +105,39 @@ elif (args["fa"]):
     config.fa_config.record_type = "protein"
 
   process_fasta($args["<file>"], config)
+
+elif (args["sam"]):
+  # process sam file
+
+  case $args["--phred"]
+  of "33":
+    config.fq_config.phred = 33
+  of "64":
+    config.fq_config.phred = 64
+
+  case $args["--color"]:
+  of "no":
+    config.sam_config.use_color = false
+  of "yes":
+    config.sam_config.use_color = true
+
+  case $args["--hist"]:
+  of "no":
+    config.sam_config.hist.use = false
+  of "yes":
+    config.sam_config.hist.use = true
+
+  case $args["--multiline"]:
+  of "no":
+    config.sam_config.multiline = false
+  of "yes":
+    config.sam_config.multiline = true
+    config.sam_config.delimiter.use = true
+
+  case $args["--delimiter"]:
+  of "no":
+    config.sam_config.delimiter.use = false
+  of "yes":
+    config.sam_config.delimiter.use = true
+  
+  process_sam($args["<file>"], config)

@@ -4,7 +4,7 @@ from color_atla import colorize, colorize_seq
 from color_atla import Color, BaseColor, FqIdPartsColors
 from configs import Config, Delimiter
 
-proc parse_quality(quality_string:string, phred:int=33): seq[int] =
+proc parse_quality*(quality_string:string, phred:int=33): seq[int] =
   assert phred == 33 or phred == 64
   result = @[]
   var q: int
@@ -13,7 +13,7 @@ proc parse_quality(quality_string:string, phred:int=33): seq[int] =
     result.add(q) 
 
 
-proc encode_quality(quality:seq[int], phred:int=33): string =
+proc encode_quality*(quality:seq[int], phred:int=33): string =
   assert phred == 33 or phred == 64
   result = ""
   var c: char
@@ -22,7 +22,7 @@ proc encode_quality(quality:seq[int], phred:int=33): string =
     result.add(c)
 
 
-proc to_hist(quality:seq[int], hist_symbols:string, symbol_unit_len:int=3): string =
+proc to_hist*(quality:seq[int], hist_symbols:string, symbol_unit_len:int=3): string =
   result = ""
   let slen = symbol_unit_len
   for q in quality:
@@ -36,7 +36,7 @@ proc to_hist(quality:seq[int], hist_symbols:string, symbol_unit_len:int=3): stri
       result.add(hist_symbols[s..e])
 
 
-proc add_space(str:string, unit:int=1, space:int=1): string =
+proc add_space*(str:string, unit:int=1, space:int=1): string =
   result = ""
   var i: int = 1
   while i <= str.len:
@@ -181,7 +181,7 @@ iterator read_fastq(file:File, phred:int=33): FastqRecord =
       rec = FastqRecord(name:nil, sequence:nil, quality:nil)
 
 
-proc to_string(delimiter: Delimiter): string =
+proc to_string*(delimiter: Delimiter): string =
   result = delimiter.str.repeat(delimiter.len).colorize(delimiter.color)
 
 

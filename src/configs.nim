@@ -57,14 +57,15 @@ type
     qname_color*: Color
     flag_color*: Color
     rname_color*: Color
+    pos_color*: Color
     mapq_color_range*: ColorRange
     cigar_color*: Color
     rnext_color*: Color
     pnext_color*: Color
     tlen_color*: Color
-    optional_fields: SamOptionalFields 
     use_base_color*: bool
     hist*: Hist
+    optional_fields_color*: SamOptionalFields 
 
   Config* = ref object
     base_color*: BaseColor
@@ -169,37 +170,37 @@ let default_json_str* = """
       "multiline": false,
 
       "delimiter": {
-        "use": true,
+        "use": false,
         "str": "-",
         "len": 150,
         "color": {"fg": -1, "bg": -1}
       },
 
       "header_color": {
-        "header_type": {"fg": -1,  "bg": -1},
-        "item_key":    {"fg": 202, "bg": -1},
+        "header_type": {"fg": 111,  "bg": -1},
+        "item_key":    {"fg": 201, "bg": -1},
         "item_value":  {"fg": 202, "bg": -1}
       },
 
-      "qname_color": {"fg": -1, "bg": -1},
-      "flag_color":  {"fg": -1, "bg": -1},
-      "rname_color": {"fg": -1, "bg": -1},
-      "pos_color":   {"fg": -1, "bg": -1},
+      "qname_color": {"fg":  40, "bg": -1},
+      "flag_color":  {"fg": 196, "bg": -1},
+      "rname_color": {"fg": 184, "bg": -1},
+      "pos_color":   {"fg": 122, "bg": -1},
 
       "mapq_color_range": {
-        "buttom": {"val":0,  "color": {"fg": -1, "bg": -1}},
-        "top":    {"val":30, "color": {"fg": -1, "bg": -1}},
+        "buttom": {"val":  0, "color": {"fg": -1, "bg": 232}},
+        "top":    {"val": 30, "color": {"fg": -1, "bg": 255}}
       },
 
-      "cigar_color": {"fg": -1, "bg": -1},
-      "rnext_color": {"fg": -1, "bg": -1},
-      "pnext_color": {"fg": -1, "bg": -1},
-      "tlen_color":  {"fg": -1, "bg": -1},
+      "cigar_color": {"fg": 225, "bg": -1},
+      "rnext_color": {"fg":  63, "bg": -1},
+      "pnext_color": {"fg":  64, "bg": -1},
+      "tlen_color":  {"fg": 200, "bg": -1},
 
       "optional_fields_color": {
-        "tag": {"fg": -1, "bg": -1},
-        "field_type": {"fg": -1, "bg": -1},
-        "value": {"fg": -1, "bg": -1}
+        "tag":        {"fg":  14, "bg": -1},
+        "field_type": {"fg": 134, "bg": -1},
+        "value":      {"fg": 210, "bg": -1}
       },
 
       "use_base_color": true,
