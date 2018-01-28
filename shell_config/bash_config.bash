@@ -4,13 +4,13 @@ function bio-less {
     file=$1
 
     if   [[ $file == *.fq ]]; then
-        bioview fq $file ${@:2} | less -S
+        bioview fq $file ${@:2} | less -rS
     elif [[ $file == *.fa ]]; then
-        bioview fa $file ${@:2} | less -S
+        bioview fa $file ${@:2} | less -rS
     elif [[ $file == *.sam ]]; then
-        bioview fa $file ${@:2} | less -S
+        bioview sam $file ${@:2} | less -rS
     elif [[ $file == *.bam ]]; then
-        samtools view -h $file | bioview sam - ${@:2} | less -S
+        samtools view -h $file | bioview sam - ${@:2} | less -rS
     else
         less -S $file
     fi
@@ -18,13 +18,13 @@ function bio-less {
 }
 
 function fq-less {
-    bioview fq $@ | less -S
+    bioview fq $@ | less -rS
 }
 
 function fa-less {
-    bioview fq $@ | less -S
+    bioview fa $@ | less -rS
 }
 
 function sam-less {
-    bioview fq $@ | less -S
+    bioview sam $@ | less -rS
 }

@@ -7,7 +7,7 @@ A configurable and easy install command line tool for the readability enhancemen
 ## Installation
 
 This tools is writen in Nim, it can be compiled to a single excutable file.
-So, it is very easy to install, just download the release excutable file, and add it to your PATH.
+So, it is very easy to install, just download the [released](https://github.com/Nanguage/bioView/releases) excutable file, and add it to your PATH.
 
 ### Shell configuration
 
