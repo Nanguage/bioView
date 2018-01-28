@@ -21,8 +21,9 @@ Options:
 """
 
 import os
+import tables
 
-import docopt
+import argparse
 
 import color_atla
 import fastq_utils
@@ -30,7 +31,7 @@ import fasta_utils
 import sam_utils
 import configs
 
-let args = docopt(doc, version = "BioView 0.0.0")
+var args = parse_args(doc)
 
 if args["color-atla"]:
   print_color_atla()
