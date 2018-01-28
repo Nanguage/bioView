@@ -18,8 +18,77 @@ For ease of use, you can append the configuration to your shell config file.
 
 ## Usage
 
+```
+Usage:
+  bioview fq <file> [--config-file=<config_file>] [--hist=<yes/no>] [--color=<yes/no>] [--phred=<33/64>] [--delimiter=<yes/no>]
+  bioview fa <file> [--config-file=<config_file>] [--color=<yes/no>] [--type=<dna/rna/protein>]
+  bioview sam <file> [--config-file=<config_file>] [--hist=<yes/no>] [--color=<yes/no>] [--phred=<33/64>] [--multiline=<yes/no>]
+  bioview color-atla
+  bioview example-config
+  bioview (-h | --help)
+```
+
+### Example:
+
+View fastq file:
+
 ``` bash
-$ bioview fq example.fq | less -S
+$ biobiew fq example.fq | less -S
+```
+
+View fasta file:
+
+``` base
+$ bioview fa example_dna.fa | less -S
+```
+
+View fasta file(protein record):
+
+``` bash
+$ bioview fa example_protein.fa | less -S
+```
+
+View sam file:
+
+``` bash
+$ bioview sam example_sam.sam | less -S
+```
+
+View sam file(multiline format):
+
+``` bash
+$ bioview sam example_sam.sam --multiline | less -S
+```
+
+Use '-' to read from stdin:
+
+``` bash
+$ samtools view -h example.bam | bioview sam - | less -S
+```
+
+### bio-less
+
+Use the `bio-less` function defined in the [shell configuration](./shell_config/bash_config.bash), it let you use bioView more conveniently.
+
+```
+Usage:
+  bio-less <*.fq/*.fa/*.sam/*.bam>
+  fq-less <*.fq>
+  fa-less <*.fa>
+  sam-less <*.sam>
+```
+
+For example:
+
+``` bash
+$ bio-less example.fq
+```
+
+This is equal to: `bioview fq example.fq | less -S`
+
+```
+$ fq-less example.fq # equal to `bioview fq example.fq | less -S`
+$ samtools view -h example.bam | sam-less - # equal to `samtools view -h example.bam | bioview sam - | less -S`
 ```
 
 ## Theme
@@ -85,15 +154,9 @@ You need [install Nim](https://nim-lang.org/install.html) firstly.
 
 ### Compile the code
 
-Install the dependancy nim package:
-
-``` bash
-$ nimble install docopt
-```
-
 Compilation:
 
-```bash
+``` bash
 $ git clone https://github.com/Nanguage/bioView.git
 $ cd bioView
 $ mkdir bin
@@ -102,7 +165,7 @@ $ nim c -d:release -o ./bin/bioview src/main.nim
 
 Unit test:
 
-```bash
+``` bash
 $ ./test.sh # test all moudles
 $ ./test.sh fastq_utils # test the fastq_utils.nim moudle
 ```
