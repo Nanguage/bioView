@@ -42,9 +42,17 @@ proc parse_header(line:string): SamHeader =
   result = SamHeader(header_type:header_type, items:header_items)
 
 
-proc to_string(header:SamHeader, type_color: Color, key_color: Color, val_color: Color): string =
-  let header_type_str = header.header_type.colorize(type_color)
-  let colored_items = lc[ (item.name.colorize(key_color) & ":" & item.value.colorize(val_color) ) | (item <- header.items), string]
+proc to_string(header:SamHeader, type_color: Color, key_color: Color, val_color: Color, use_color: bool): string =
+  let header_type_str =
+    if use_color:
+      header.header_type.colorize(type_color)
+    else:
+      header.header_type
+  var colored_items: seq[string]
+  if use_color:
+    colored_items = lc[ (item.name.colorize(key_color) & ":" & item.value.colorize(val_color) ) | (item <- header.items), string]
+  else:
+    colored_items = lc[ (item.name & ":" & item.value ) | (item <- header.items), string ]
   let items_str = join(colored_items, "\t")
   result = "@" & header_type_str & "\t" & items_str
 
@@ -173,7 +181,7 @@ proc process_sam*(fname:string, config:Config) =
     if line.startswith("@"):
       let header = parse_header(line)
       let hc = config.sam_config.header_color
-      echo header.to_string(hc.header_type, hc.item_key, hc.item_value)
+      echo header.to_string(hc.header_type, hc.item_key, hc.item_value, config.sam_config.use_color)
     else:
       if config.sam_config.delimiter.use:
         echo config.sam_config.delimiter.to_string()
@@ -198,7 +206,7 @@ when isMainModule:
     vc = sam_conf.header_color.item_value
 
   let header_1 = parse_header(header_line_1)
-  echo header_1.to_string(hc, kc, vc)
+  echo header_1.to_string(hc, kc, vc, true)
 
   let header_2 = parse_header(header_line_2)
-  echo header_2.to_string(hc, kc, vc)
+  echo header_2.to_string(hc, kc, vc, true)
