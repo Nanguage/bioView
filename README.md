@@ -33,37 +33,37 @@ Usage:
 View fastq file:
 
 ``` bash
-$ biobiew fq example.fq | less -S
+$ biobiew fq example.fq | less -rS
 ```
 
 View fasta file:
 
 ``` base
-$ bioview fa example_dna.fa | less -S
+$ bioview fa example_dna.fa | less -rS
 ```
 
 View fasta file(protein record):
 
 ``` bash
-$ bioview fa example_protein.fa | less -S
+$ bioview fa example_protein.fa | less -rS
 ```
 
 View sam file:
 
 ``` bash
-$ bioview sam example_sam.sam | less -S
+$ bioview sam example_sam.sam | less -rS
 ```
 
 View sam file(multiline format):
 
 ``` bash
-$ bioview sam example_sam.sam --multiline | less -S
+$ bioview sam example_sam.sam --multiline | less -rS
 ```
 
 Use '-' to read from stdin:
 
 ``` bash
-$ samtools view -h example.bam | bioview sam - | less -S
+$ samtools view -h example.bam | bioview sam - | less -rS
 ```
 
 ### bio-less
@@ -84,11 +84,11 @@ For example:
 $ bio-less example.fq
 ```
 
-This is equal to: `bioview fq example.fq | less -S`
+This is equal to: `bioview fq example.fq | less -rS`
 
 ```
-$ fq-less example.fq # equal to `bioview fq example.fq | less -S`
-$ samtools view -h example.bam | sam-less - # equal to `samtools view -h example.bam | bioview sam - | less -S`
+$ fq-less example.fq # equal to `bioview fq example.fq | less -rS`
+$ samtools view -h example.bam | sam-less - # equal to `samtools view -h example.bam | bioview sam - | less -rS`
 ```
 
 ## Theme
