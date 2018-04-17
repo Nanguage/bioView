@@ -33,7 +33,7 @@ Usage:
 View fastq file:
 
 ``` bash
-$ biobiew fq example.fq | less -rS
+$ bioview fq example.fq | less -rS
 ```
 
 View fasta file:
