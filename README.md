@@ -169,3 +169,10 @@ Unit test:
 $ ./test.sh # test all moudles
 $ ./test.sh fastq_utils # test the fastq_utils.nim moudle
 ```
+## TODO
++ upport other file format:
+    * GTF/GFF
+    * PDB
+    * VCF
+    * BED/BedGraph/BEDPE
++ Fix the color show bug with `less`.
