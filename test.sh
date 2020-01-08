@@ -16,7 +16,7 @@ function test {
     echo test $moudle_path
     echo "============================="
 
-    nim c -r $moudle_path
+    nim c --nilseqs:on -r $moudle_path
     exe="src/$moudle"
     rm $exe
 }

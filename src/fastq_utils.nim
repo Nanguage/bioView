@@ -170,12 +170,12 @@ iterator read_fastq(file:File, phred:int=33): FastqRecord =
     let i = (line_num) %% 4
     case i:
     of 1:
-      rec.name = line[1..line.len]
+      rec.name = line[1..(line.len-1)]
     of 2:
       rec.sequence = line
     of 3:
       continue
-    of 0:
+    else:
       rec.quality = line.parse_quality(phred=phred)
       yield rec
       rec = FastqRecord(name:nil, sequence:nil, quality:nil)
