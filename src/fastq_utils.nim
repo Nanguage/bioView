@@ -107,7 +107,7 @@ type
 proc to_string(self:FastqRecord,
                phred:int=33,
                use_color:bool=true,
-               hist_symbols:string=nil,
+               hist_symbols:string="",
                hist_symbol_unit_len:int=3,
                align:int=1,
                hist_color:Color=nil,
@@ -147,7 +147,7 @@ proc to_string(self:FastqRecord,
     seq_str = seq_str
 
   # process quality string
-  if hist_symbols == nil:
+  if hist_symbols == "":
     qua_str = self.quality.encode_quality(phred=phred)
   else: # use histogram
     qua_str = self.quality.to_hist(hist_symbols, symbol_unit_len=hist_symbol_unit_len)
@@ -163,7 +163,7 @@ proc to_string(self:FastqRecord,
 
 
 iterator read_fastq(file:File, phred:int=33): FastqRecord =
-  var rec = FastqRecord(name:nil, sequence:nil, quality:nil)
+  var rec = FastqRecord(name: "", sequence: "", quality: @[])
   var line_num = 0
   for line in file.lines:
     inc line_num
@@ -178,7 +178,7 @@ iterator read_fastq(file:File, phred:int=33): FastqRecord =
     else:
       rec.quality = line.parse_quality(phred=phred)
       yield rec
-      rec = FastqRecord(name:nil, sequence:nil, quality:nil)
+      rec = FastqRecord(name: "", sequence: "", quality: @[])
 
 
 proc to_string*(delimiter: Delimiter): string =
@@ -193,7 +193,7 @@ proc process_fastq*(fname: string, config:Config) =
   let base_color = if use_color: config.base_color else: nil
 
   let use_hist = config.fq_config.hist.use
-  let hist_symbols = if use_hist: config.fq_config.hist.symbols else: nil
+  let hist_symbols = if use_hist: config.fq_config.hist.symbols else: ""
   let hist_color = config.fq_config.hist.color
   let hist_symbol_unit_len = config.fq_config.hist.symbol_unit_len
   let align = config.fq_config.hist.align

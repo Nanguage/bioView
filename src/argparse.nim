@@ -1,5 +1,5 @@
 import tables
-import parseopt2
+import parseopt
 
 type
 
@@ -25,7 +25,7 @@ converter to_bool*(v: Value): bool =
   of vkBool:
     v.bool_v
   of vkStr:
-    v.str_v != nil and v.str_v.len > 0 
+    v.str_v != "" and v.str_v.len > 0 
 
 
 proc val(): Value = Value(kind: vkNone)

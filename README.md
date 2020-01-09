@@ -160,7 +160,7 @@ Compilation:
 $ git clone https://github.com/Nanguage/bioView.git
 $ cd bioView
 $ mkdir bin
-$ nim c --nilseqs:on -d:release -o:./bin/bioview src/main.nim
+$ nim c -d:release -o:./bin/bioview src/main.nim
 ```
 
 Unit test:

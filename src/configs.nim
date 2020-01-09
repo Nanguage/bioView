@@ -227,9 +227,9 @@ proc load_from_path(path: string="~/.config/bioview/config.json"): JsonNode =
   parseFile(path)
 
 
-proc load_config*(path: string=nil): Config =
+proc load_config*(path: string=""): Config =
   var config_json: JsonNode
-  if path != nil and existsFile(path):
+  if path != "" and existsFile(path):
     config_json = load_from_path(path)
   else:
     config_json = parseJson(default_json_str)
